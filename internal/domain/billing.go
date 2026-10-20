@@ -2,16 +2,16 @@ package domain
 
 import "time"
 
-type PlayerBill struct {
-	PlayerID uint    `json:"player_id"`
+type MemberBill struct {
+	MemberID uint    `json:"member_id"`
 	Name     string  `json:"name"`
 	Amount   float64 `json:"amount"`
 }
 
-// LedgerEntry is one player's running account across every session.
-// Balance = TotalPaid - TotalBill, so a negative balance means the player owes money.
+// LedgerEntry is one member's running account across every session.
+// Balance = TotalPaid - TotalBill, so a negative balance means the member owes money.
 type LedgerEntry struct {
-	PlayerID  uint    `json:"player_id"`
+	MemberID  uint    `json:"member_id"`
 	Name      string  `json:"name"`
 	Phone     string  `json:"phone"`
 	TotalBill float64 `json:"total_bill"`
@@ -19,7 +19,7 @@ type LedgerEntry struct {
 	Balance   float64 `json:"balance"`
 }
 
-// SessionCharge is what a player was billed and paid for one session.
+// SessionCharge is what a member was billed and paid for one session.
 type SessionCharge struct {
 	SessionID uint      `json:"session_id"`
 	StartTime time.Time `json:"start_time"`
@@ -29,7 +29,7 @@ type SessionCharge struct {
 	Paid      float64   `json:"paid"`
 }
 
-type PlayerLedger struct {
+type MemberLedger struct {
 	LedgerEntry
 	Sessions []SessionCharge `json:"sessions"`
 	Payments []Payment       `json:"payments"`

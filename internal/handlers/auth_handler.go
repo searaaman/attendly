@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/searaaman/playledger/internal/config"
-	"github.com/searaaman/playledger/internal/domain"
-	"github.com/searaaman/playledger/internal/services"
+	"github.com/searaaman/attendly/internal/config"
+	"github.com/searaaman/attendly/internal/domain"
+	"github.com/searaaman/attendly/internal/services"
 )
 
 func Register(ctx *gin.Context) {

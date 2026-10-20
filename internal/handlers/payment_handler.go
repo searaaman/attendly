@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/searaaman/playledger/internal/config"
-	"github.com/searaaman/playledger/internal/domain"
-	"github.com/searaaman/playledger/internal/services"
+	"github.com/searaaman/attendly/internal/config"
+	"github.com/searaaman/attendly/internal/domain"
+	"github.com/searaaman/attendly/internal/services"
 )
 
 func CreatePayment(ctx *gin.Context) {
@@ -18,10 +18,10 @@ func CreatePayment(ctx *gin.Context) {
 		return
 	}
 
-	var player domain.Player
-	if err := config.DB.First(&player, request.PlayerID).Error; err != nil {
+	var member domain.Member
+	if err := config.DB.First(&member, request.MemberID).Error; err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
-			"error": "player not found",
+			"error": "member not found",
 		})
 		return
 	}
@@ -31,22 +31,22 @@ func CreatePayment(ctx *gin.Context) {
 		return
 	}
 
-	playedInSession := false
+	attendedSession := false
 	for _, bill := range services.CalculateSessionBills(session) {
-		if bill.PlayerID == request.PlayerID {
-			playedInSession = true
+		if bill.MemberID == request.MemberID {
+			attendedSession = true
 			break
 		}
 	}
-	if !playedInSession {
+	if !attendedSession {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "player is not part of this session",
+			"error": "member is not part of this session",
 		})
 		return
 	}
 
 	payment := domain.Payment{
-		PlayerID:  request.PlayerID,
+		MemberID:  request.MemberID,
 		SessionID: request.SessionID,
 		Amount:    request.Amount,
 	}
@@ -56,16 +56,16 @@ func CreatePayment(ctx *gin.Context) {
 		})
 		return
 	}
-	payment.Player = &player
+	payment.Member = &member
 	ctx.JSON(http.StatusCreated, payment)
 }
 
 // ListPayments returns payments, newest first, optionally filtered by
-// ?player_id= and/or ?session_id=.
+// ?member_id= and/or ?session_id=.
 func ListPayments(ctx *gin.Context) {
-	query := config.DB.Preload("Player").Order("created_at DESC")
-	if playerID := ctx.Query("player_id"); playerID != "" {
-		query = query.Where("player_id = ?", playerID)
+	query := config.DB.Preload("Member").Order("created_at DESC")
+	if memberID := ctx.Query("member_id"); memberID != "" {
+		query = query.Where("member_id = ?", memberID)
 	}
 	if sessionID := ctx.Query("session_id"); sessionID != "" {
 		query = query.Where("session_id = ?", sessionID)

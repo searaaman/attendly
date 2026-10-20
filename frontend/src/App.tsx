@@ -4,8 +4,8 @@ import RequireAuth from "./components/RequireAuth";
 import CreateSession from "./pages/CreateSession";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
-import PlayerDetail from "./pages/PlayerDetail";
-import Players from "./pages/Players";
+import MemberDetail from "./pages/MemberDetail";
+import Members from "./pages/Members";
 import Register from "./pages/Register";
 import SessionDetail from "./pages/SessionDetail";
 import Sessions from "./pages/Sessions";
@@ -30,8 +30,8 @@ function App() {
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/sessions/new" element={<CreateSession />} />
           <Route path="/sessions/:id" element={<SessionDetail />} />
-          <Route path="/players" element={<Players />} />
-          <Route path="/players/:id" element={<PlayerDetail />} />
+          <Route path="/members" element={<Members />} />
+          <Route path="/members/:id" element={<MemberDetail />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

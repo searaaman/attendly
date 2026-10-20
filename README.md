@@ -1,53 +1,53 @@
-# PlayLedger
+# Attendly
 
-PlayLedger is an attendance and billing platform for recurring pickleball sessions. It records which players participated in each time slot, calculates individual charges from actual participation, and maintains a running ledger of billed amounts, payments and outstanding balances.
+Attendly is an attendance and billing platform for recurring sessions that share booked resources, such as sports courts, meeting rooms, coworking desks, studios or lab equipment. It records which members participated in each time slot, calculates individual charges from actual participation, and maintains a running ledger of billed amounts, payments and outstanding balances.
 
-Court bookings typically span several hours, while players arrive and leave at different times. Rather than splitting the total cost evenly across everyone who attended, PlayLedger bills each player only for the time slots they participated in, at their proportional share of the courts booked for those slots. Unpaid balances carry forward automatically to subsequent sessions.
+Bookings typically span several hours, while members arrive and leave at different times. Rather than splitting the total cost evenly across everyone who attended, Attendly bills each member only for the time slots they participated in, at their proportional share of the units booked for those slots. Unpaid balances carry forward automatically to subsequent sessions.
 
 Built with **Go (Gin, GORM, PostgreSQL)** and **React (TypeScript, Vite)**.
 
 ## Features
 
-- **Session and time slot management.** Sessions can be divided into hourly slots automatically, with the number of courts configured per slot.
-- **Slot-level attendance.** An attendance grid (players × time slots) records participation for each slot.
-- **Proportional billing.** Each slot's court cost is divided evenly among the players in that slot.
-- **Payments and ledger.** Payments are recorded per player, with balances carried forward across sessions.
-- **Player history.** Each player has a per-session breakdown of charges and payments, with a WhatsApp link for payment reminders.
+- **Session and time slot management.** Sessions can be divided into hourly slots automatically, with the number of units configured per slot.
+- **Slot-level attendance.** An attendance grid (members × time slots) records participation for each slot.
+- **Proportional billing.** Each slot's booking cost is divided evenly among the members in that slot.
+- **Payments and ledger.** Payments are recorded per member, with balances carried forward across sessions.
+- **Member history.** Each member has a per-session breakdown of charges and payments, with a WhatsApp link for payment reminders.
 - **Authentication.** JWT-based authentication with token expiry and configurable self-registration.
 - **API documentation.** OpenAPI specification served through Swagger UI at `/docs`.
 
 ## Billing model
 
-For every time slot:
+A *unit* is whatever is booked: a court, a room, a desk or a machine. For every time slot:
 
 ```
-slot cost       = courts booked × court price per hour
-cost per player = slot cost ÷ players in that slot
+slot cost       = units booked × unit price per hour
+cost per member = slot cost ÷ members in that slot
 ```
 
-A player's charge for a session is the sum of their charges across all slots they participated in. Slots with no players are not billed.
+A member's charge for a session is the sum of their charges across all slots they participated in. Slots with no members are not billed.
 
-**Example** (court price ₹300 per hour):
+**Example** (unit price ₹300 per hour):
 
-| Time slot   | Courts booked | Players in slot | Charge per player |
+| Time slot   | Units booked  | Members in slot | Charge per member |
 | ----------- | ------------- | --------------- | ----------------- |
 | 7pm – 8pm   | 2             | 3               | ₹200              |
 | 8pm – 9pm   | 1             | 2               | ₹150              |
 
-A player present in both slots is billed ₹350; a player present only in the first slot is billed ₹200.
+A member present in both slots is billed ₹350; a member present only in the first slot is billed ₹200.
 
-Payments are recorded against a player and session rather than individual time slots. Each player's balance is calculated as:
+Payments are recorded against a member and session rather than individual time slots. Each member's balance is calculated as:
 
 ```
 balance = total paid − total billed      (negative = still owes)
 ```
 
-A player billed ₹350 who pays ₹300 carries a balance of −₹50 into subsequent sessions.
+A member billed ₹350 who pays ₹300 carries a balance of −₹50 into subsequent sessions.
 
 ## Project structure
 
 ```
-playledger/
+attendly/
 ├── cmd/api/main.go            # entry point and routes
 ├── internal/
 │   ├── config/                # env loading and database connection
@@ -59,7 +59,7 @@ playledger/
 └── frontend/                  # React app
     └── src/
         ├── api/               # API client and typed endpoint functions
-        ├── pages/             # Dashboard, Sessions, Session detail, Players, ...
+        ├── pages/             # Dashboard, Sessions, Session detail, Members, ...
         ├── components/
         └── lib/               # formatting and helpers
 ```
@@ -73,7 +73,7 @@ Handlers deal with HTTP; anything that decides money or business rules lives in 
 ### 1. Database
 
 ```bash
-createdb playledger
+createdb attendly
 ```
 
 Tables are created automatically when the API starts.
@@ -115,7 +115,7 @@ All settings come from environment variables, or from a `.env` file in the direc
 | `DB_PORT`            | `5432`                   |                                                   |
 | `DB_USER`            | `postgres`               |                                                   |
 | `DB_PASSWORD`        | (empty)                  |                                                   |
-| `DB_NAME`            | `playledger`             |                                                   |
+| `DB_NAME`            | `attendly`             |                                                   |
 | `DB_SSLMODE`         | `disable`                | Use `require` for hosted databases                |
 | `SERVER_PORT`        | `8080`                   | Falls back to `PORT` if set                       |
 | `JWT_SECRET`         | (required)               | The API refuses to start without it               |
@@ -132,21 +132,21 @@ Everything except `/health`, `/register`, `/login` and `/docs` needs an `Authori
 | ------ | ------------------------------------- | ---------------------------------------------- |
 | POST   | `/register`                           | Create an account                              |
 | POST   | `/login`                              | Get a JWT                                      |
-| GET    | `/sessions`                           | List sessions with slots and players           |
+| GET    | `/sessions`                           | List sessions with slots and members           |
 | POST   | `/sessions`                           | Create a session (optionally with hourly slots)|
 | GET    | `/sessions/:id`                       | One session                                    |
 | DELETE | `/sessions/:id`                       | Delete a session (refused if it has payments)  |
-| GET    | `/sessions/:id/billing`               | What each player owes for the session          |
+| GET    | `/sessions/:id/billing`               | What each member owes for the session          |
 | POST   | `/sessions/:id/timeslots`             | Add a time slot                                |
-| PUT    | `/timeslots/:id`                      | Change courts booked                           |
+| PUT    | `/timeslots/:id`                      | Change units booked                           |
 | DELETE | `/timeslots/:id`                      | Delete a slot                                  |
-| POST   | `/timeslots/:id/players`              | Mark a player as playing in a slot             |
-| DELETE | `/timeslots/:id/players/:playerId`    | Remove a player from a slot                    |
-| GET    | `/players`                            | List players                                   |
-| POST   | `/players`                            | Add a player                                   |
-| GET    | `/players/:id/ledger`                 | A player's balance, sessions and payments      |
-| GET    | `/ledger`                             | Every player's balance                         |
-| GET    | `/payments`                           | List payments (`?player_id=`, `?session_id=`)  |
+| POST   | `/timeslots/:id/members`              | Mark a member as present in a slot             |
+| DELETE | `/timeslots/:id/members/:memberId`    | Remove a member from a slot                    |
+| GET    | `/members`                            | List members                                   |
+| POST   | `/members`                            | Add a member                                   |
+| GET    | `/members/:id/ledger`                 | A member's balance, sessions and payments      |
+| GET    | `/ledger`                             | Every member's balance                         |
+| GET    | `/payments`                           | List payments (`?member_id=`, `?session_id=`)  |
 | POST   | `/payments`                           | Record a payment                               |
 | DELETE | `/payments/:id`                       | Delete a payment                               |
 
@@ -156,12 +156,12 @@ The frontend is published to GitHub Pages and the API runs on Render, backed by 
 
 **Database (Neon).** Create a project and copy its connection string (`postgres://…?sslmode=require`).
 
-**API (Render).** In the Render dashboard choose *New → Blueprint* and select this repository. [`render.yaml`](render.yaml) defines the service; when prompted, paste the Neon connection string as `DATABASE_URL`. `JWT_SECRET` is generated automatically. Once deployed, note the service URL, e.g. `https://playledger-api.onrender.com`.
+**API (Render).** In the Render dashboard choose *New → Blueprint* and select this repository. [`render.yaml`](render.yaml) defines the service; when prompted, paste the Neon connection string as `DATABASE_URL`. `JWT_SECRET` is generated automatically. Once deployed, note the service URL, e.g. `https://attendly-api.onrender.com`.
 
 **Frontend (GitHub Pages).**
 1. In the repository settings, set *Pages → Source* to **GitHub Actions**.
 2. Add a repository variable `VITE_API_URL` (*Settings → Secrets and variables → Actions → Variables*) containing the Render URL.
-3. Push to `master` or run the *Deploy frontend* workflow manually. The app is served at `https://<user>.github.io/playledger/`.
+3. Push to `master` or run the *Deploy frontend* workflow manually. The app is served at `https://<user>.github.io/attendly/`.
 
 After creating your account, set `ALLOW_REGISTRATION=false` on Render so no one else can sign up.
 

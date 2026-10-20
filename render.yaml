@@ -2,7 +2,7 @@
 # New > Blueprint > pick this repository.
 services:
   - type: web
-    name: playledger-api
+    name: attendly-api
     runtime: go
     plan: free
     branch: master

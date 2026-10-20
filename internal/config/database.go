@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/searaaman/playledger/internal/domain"
+	"github.com/searaaman/attendly/internal/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -26,7 +26,7 @@ func ConnectDatabase() {
 	DB = db
 	err = DB.AutoMigrate(
 		&domain.Session{},
-		&domain.Player{},
+		&domain.Member{},
 		&domain.TimeSlot{},
 		&domain.Payment{},
 		&domain.User{},

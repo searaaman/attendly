@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
-  title: PlayLedger API
+  title: Attendly API
   version: 1.0.0
   description: |
-    Track pickleball sessions, who played in which time slot, what each player owes, and what they paid.
+    Track sessions, who attended which time slot, what each member owes, and what they paid.
 
-    **Billing rule:** for each time slot, `courts_booked × court_price` is split evenly between
-    the players in that slot. A player's session bill is the sum over the slots they played.
+    **Billing rule:** for each time slot, `units_booked × unit_rate` is split evenly between
+    the members in that slot. A member's session bill is the sum over the slots they attended.
 
-    **Ledger:** `balance = total_paid - total_bill`. Negative means the player owes money.
+    **Ledger:** `balance = total_paid - total_bill`. Negative means the member owes money.
     Unpaid amounts carry forward because the ledger is computed across all sessions.
 
     Every endpoint except `/health`, `/register`, `/login` and `/docs` needs
@@ -22,7 +22,7 @@ tags:
   - name: Auth
   - name: Sessions
   - name: Time slots
-  - name: Players
+  - name: Members
   - name: Payments
 
 paths:
@@ -103,7 +103,7 @@ paths:
   /sessions:
     get:
       tags: [Sessions]
-      summary: List sessions, newest first, with slots and players
+      summary: List sessions, newest first, with slots and members
       responses:
         "200":
           description: Sessions
@@ -116,7 +116,7 @@ paths:
     post:
       tags: [Sessions]
       summary: Create a session
-      description: With `hourly_slots=true`, one slot per hour is created, each with `default_courts` courts. A trailing part-hour becomes a shorter slot.
+      description: With `hourly_slots=true`, one slot per hour is created, each with `default_units` units. A trailing part-hour becomes a shorter slot.
       requestBody:
         required: true
         content:
@@ -127,9 +127,9 @@ paths:
               properties:
                 start_time: { type: string, format: date-time, example: "2026-09-27T18:00:00+05:30" }
                 end_time: { type: string, format: date-time, example: "2026-09-27T22:00:00+05:30" }
-                court_price: { type: number, minimum: 0, example: 300 }
+                unit_rate: { type: number, minimum: 0, example: 300 }
                 hourly_slots: { type: boolean, example: true }
-                default_courts: { type: integer, minimum: 0, example: 2 }
+                default_units: { type: integer, minimum: 0, example: 2 }
       responses:
         "201":
           description: Created
@@ -144,7 +144,7 @@ paths:
       - $ref: "#/components/parameters/id"
     get:
       tags: [Sessions]
-      summary: Get a session with its slots and players
+      summary: Get a session with its slots and members
       responses:
         "200":
           description: Session
@@ -178,7 +178,7 @@ paths:
               properties:
                 start_time: { type: string, format: date-time }
                 end_time: { type: string, format: date-time }
-                courts_booked: { type: integer, minimum: 0, example: 2 }
+                units_booked: { type: integer, minimum: 0, example: 2 }
       responses:
         "201":
           description: Created
@@ -193,7 +193,7 @@ paths:
       - $ref: "#/components/parameters/id"
     get:
       tags: [Sessions]
-      summary: What each player owes for this session
+      summary: What each member owes for this session
       responses:
         "200":
           description: Bills, sorted by name
@@ -201,7 +201,7 @@ paths:
             application/json:
               schema:
                 type: array
-                items: { $ref: "#/components/schemas/PlayerBill" }
+                items: { $ref: "#/components/schemas/MemberBill" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /timeslots/{id}:
@@ -209,7 +209,7 @@ paths:
       - $ref: "#/components/parameters/id"
     put:
       tags: [Time slots]
-      summary: Change how many courts were booked for a slot
+      summary: Change how many units were booked for a slot
       requestBody:
         required: true
         content:
@@ -217,7 +217,7 @@ paths:
             schema:
               type: object
               properties:
-                courts_booked: { type: integer, minimum: 0, example: 1 }
+                units_booked: { type: integer, minimum: 0, example: 1 }
       responses:
         "200":
           description: Updated
@@ -233,22 +233,22 @@ paths:
         "204": { description: Deleted }
         "404": { $ref: "#/components/responses/NotFound" }
 
-  /timeslots/{id}/players:
+  /timeslots/{id}/members:
     parameters:
       - $ref: "#/components/parameters/id"
     post:
       tags: [Time slots]
-      summary: Mark a player as having played in this slot
-      description: Idempotent. Assigning an already-assigned player does nothing.
+      summary: Mark a member as present in this slot
+      description: Idempotent. Assigning an already-assigned member does nothing.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [player_id]
+              required: [member_id]
               properties:
-                player_id: { type: integer, example: 1 }
+                member_id: { type: integer, example: 1 }
       responses:
         "200":
           description: Assigned
@@ -258,35 +258,35 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
 
-  /timeslots/{id}/players/{playerId}:
+  /timeslots/{id}/members/{memberId}:
     parameters:
       - $ref: "#/components/parameters/id"
-      - name: playerId
+      - name: memberId
         in: path
         required: true
         schema: { type: integer }
     delete:
       tags: [Time slots]
-      summary: Remove a player from a slot
+      summary: Remove a member from a slot
       responses:
         "204": { description: Removed }
         "404": { $ref: "#/components/responses/NotFound" }
 
-  /players:
+  /members:
     get:
-      tags: [Players]
-      summary: List players, sorted by name
+      tags: [Members]
+      summary: List members, sorted by name
       responses:
         "200":
-          description: Players
+          description: Members
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: "#/components/schemas/Player" }
+                items: { $ref: "#/components/schemas/Member" }
     post:
-      tags: [Players]
-      summary: Create a player
+      tags: [Members]
+      summary: Create a member
       requestBody:
         required: true
         content:
@@ -295,34 +295,34 @@ paths:
               type: object
               required: [name]
               properties:
-                name: { type: string, example: Karan }
+                name: { type: string, example: Alex }
                 phone: { type: string, example: "9876543210" }
       responses:
         "201":
           description: Created
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Player" }
+              schema: { $ref: "#/components/schemas/Member" }
         "400": { $ref: "#/components/responses/BadRequest" }
 
-  /players/{id}/ledger:
+  /members/{id}/ledger:
     parameters:
       - $ref: "#/components/parameters/id"
     get:
-      tags: [Players]
-      summary: One player's balance, per-session breakdown and payments
+      tags: [Members]
+      summary: One member's balance, per-session breakdown and payments
       responses:
         "200":
           description: Ledger
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PlayerLedger" }
+              schema: { $ref: "#/components/schemas/MemberLedger" }
         "404": { $ref: "#/components/responses/NotFound" }
 
   /ledger:
     get:
-      tags: [Players]
-      summary: Every player's balance, biggest debts first
+      tags: [Members]
+      summary: Every member's balance, biggest debts first
       responses:
         "200":
           description: Ledger
@@ -337,7 +337,7 @@ paths:
       tags: [Payments]
       summary: List payments, newest first
       parameters:
-        - { name: player_id, in: query, schema: { type: integer } }
+        - { name: member_id, in: query, schema: { type: integer } }
         - { name: session_id, in: query, schema: { type: integer } }
       responses:
         "200":
@@ -350,16 +350,16 @@ paths:
     post:
       tags: [Payments]
       summary: Record a payment
-      description: The player must have played in at least one slot of the session.
+      description: The member must have attended at least one slot of the session.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [player_id, session_id, amount]
+              required: [member_id, session_id, amount]
               properties:
-                player_id: { type: integer, example: 1 }
+                member_id: { type: integer, example: 1 }
                 session_id: { type: integer, example: 1 }
                 amount: { type: number, exclusiveMinimum: true, minimum: 0, example: 300 }
       responses:
@@ -432,7 +432,7 @@ components:
         id: { type: integer }
         name: { type: string }
         email: { type: string }
-    Player:
+    Member:
       type: object
       properties:
         id: { type: integer }
@@ -445,35 +445,35 @@ components:
         session_id: { type: integer }
         start_time: { type: string, format: date-time }
         end_time: { type: string, format: date-time }
-        courts_booked: { type: integer }
-        players:
+        units_booked: { type: integer }
+        members:
           type: array
-          items: { $ref: "#/components/schemas/Player" }
+          items: { $ref: "#/components/schemas/Member" }
     Session:
       type: object
       properties:
         id: { type: integer }
         start_time: { type: string, format: date-time }
         end_time: { type: string, format: date-time }
-        court_price: { type: number }
+        unit_rate: { type: number }
         time_slots:
           type: array
           items: { $ref: "#/components/schemas/TimeSlot" }
-    PlayerBill:
+    MemberBill:
       type: object
       properties:
-        player_id: { type: integer }
+        member_id: { type: integer }
         name: { type: string }
         amount: { type: number }
     LedgerEntry:
       type: object
       properties:
-        player_id: { type: integer }
+        member_id: { type: integer }
         name: { type: string }
         phone: { type: string }
         total_bill: { type: number }
         total_paid: { type: number }
-        balance: { type: number, description: "total_paid - total_bill; negative means the player owes" }
+        balance: { type: number, description: "total_paid - total_bill; negative means the member owes" }
     SessionCharge:
       type: object
       properties:
@@ -483,7 +483,7 @@ components:
         slot_count: { type: integer }
         bill: { type: number }
         paid: { type: number }
-    PlayerLedger:
+    MemberLedger:
       allOf:
         - $ref: "#/components/schemas/LedgerEntry"
         - type: object
@@ -498,8 +498,8 @@ components:
       type: object
       properties:
         id: { type: integer }
-        player_id: { type: integer }
+        member_id: { type: integer }
         session_id: { type: integer }
         amount: { type: number }
         created_at: { type: string, format: date-time }
-        player: { $ref: "#/components/schemas/Player" }
+        member: { $ref: "#/components/schemas/Member" }

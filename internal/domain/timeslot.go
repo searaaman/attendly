@@ -5,10 +5,10 @@ import "time"
 type TimeSlot struct {
 	ID uint `gorm:"primaryKey" json:"id"`
 
-	StartTime    time.Time `json:"start_time"`
-	EndTime      time.Time `json:"end_time"`
-	CourtsBooked int       `gorm:"column:courtsbooked" json:"courts_booked"`
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
+	UnitsBooked int       `json:"units_booked"`
 
 	SessionID uint     `json:"session_id"`
-	Players   []Player `gorm:"many2many:player_time_slots;" json:"players"`
+	Members   []Member `gorm:"many2many:member_time_slots;" json:"members"`
 }

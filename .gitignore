@@ -5,7 +5,7 @@
 
 # Go build output
 /api
-/playledger
+/attendly
 /bin/
 *.exe
 *.test

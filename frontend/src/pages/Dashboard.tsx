@@ -36,7 +36,7 @@ function Dashboard() {
           <div className={`stat-value ${outstanding > 0 ? "owes" : ""}`}>{money(outstanding)}</div>
         </div>
         <div className="stat">
-          <div className="stat-label">Players owing</div>
+          <div className="stat-label">Members owing</div>
           <div className="stat-value">{owing.length}</div>
         </div>
         <div className="stat">
@@ -53,8 +53,8 @@ function Dashboard() {
         <section className="card card-flush">
           <div className="card-head">
             <h2>Who owes</h2>
-            <Link to="/players" className="small">
-              All players →
+            <Link to="/members" className="small">
+              All members →
             </Link>
           </div>
           {owing.length === 0 ? (
@@ -65,9 +65,9 @@ function Dashboard() {
                 <tbody>
                   {owing.slice(0, 8).map((entry) => (
                     <tr
-                      key={entry.player_id}
+                      key={entry.member_id}
                       className="clickable"
-                      onClick={() => navigate(`/players/${entry.player_id}`)}
+                      onClick={() => navigate(`/members/${entry.member_id}`)}
                     >
                       <td>{entry.name}</td>
                       <td className="num">

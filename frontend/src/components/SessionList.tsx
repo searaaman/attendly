@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { money, timeRange } from "../lib/format";
-import { sessionCost, sessionPlayers, slotsOf } from "../lib/session";
+import { sessionCost, sessionMembers, slotsOf } from "../lib/session";
 import type { Session } from "../types";
 
 function SessionList({ sessions }: { sessions: Session[] }) {
@@ -12,7 +12,7 @@ function SessionList({ sessions }: { sessions: Session[] }) {
       {sessions.map((session) => {
         const start = new Date(session.start_time);
         const slots = slotsOf(session).length;
-        const players = sessionPlayers(session).length;
+        const members = sessionMembers(session).length;
         return (
           <Link key={session.id} to={`/sessions/${session.id}`} className="session-item">
             <div className="date-badge">
@@ -24,8 +24,8 @@ function SessionList({ sessions }: { sessions: Session[] }) {
             <div>
               <div style={{ fontWeight: 600 }}>{timeRange(session.start_time, session.end_time)}</div>
               <div className="muted small">
-                {slots} slot{slots === 1 ? "" : "s"} · {players} player{players === 1 ? "" : "s"} ·{" "}
-                {money(session.court_price)}/court/hr
+                {slots} slot{slots === 1 ? "" : "s"} · {members} member{members === 1 ? "" : "s"} ·{" "}
+                {money(session.unit_rate)}/unit/hr
               </div>
             </div>
             <div className="num" style={{ fontWeight: 600 }}>

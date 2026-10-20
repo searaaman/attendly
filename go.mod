@@ -1,4 +1,4 @@
-module github.com/searaaman/playledger
+module github.com/searaaman/attendly
 
 go 1.26.3
 
