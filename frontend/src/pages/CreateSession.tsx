@@ -29,9 +29,9 @@ function CreateSession() {
   const [day, setDay] = useState(todayInputValue());
   const [start, setStart] = useState("18:00");
   const [end, setEnd] = useState("22:00");
-  const [courtPrice, setCourtPrice] = useState("300");
+  const [unitRate, setUnitRate] = useState("300");
   const [hourly, setHourly] = useState(true);
-  const [courts, setCourts] = useState("2");
+  const [units, setUnits] = useState("2");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -40,7 +40,7 @@ function CreateSession() {
     ? sessionRange(day, start, end)
     : { startDate: null, endDate: null };
   const preview = startDate && endDate && hourly ? hourlyPreview(startDate, endDate) : [];
-  const estimated = preview.length * Number(courts || 0) * Number(courtPrice || 0);
+  const estimated = preview.length * Number(units || 0) * Number(unitRate || 0);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -51,9 +51,9 @@ function CreateSession() {
       const session = await createSession({
         start_time: startDate.toISOString(),
         end_time: endDate.toISOString(),
-        court_price: Number(courtPrice),
+        unit_rate: Number(unitRate),
         hourly_slots: hourly,
-        default_courts: Number(courts),
+        default_units: Number(units),
       });
       navigate(`/sessions/${session.id}`);
     } catch (err) {
@@ -89,14 +89,14 @@ function CreateSession() {
             <input type="time" required value={end} onChange={(e) => setEnd(e.target.value)} />
           </label>
           <label>
-            Court price per hour (₹)
+            Unit price per hour (₹)
             <input
               type="number"
               min="0"
               step="any"
               required
-              value={courtPrice}
-              onChange={(e) => setCourtPrice(e.target.value)}
+              value={unitRate}
+              onChange={(e) => setUnitRate(e.target.value)}
             />
           </label>
         </div>
@@ -109,13 +109,13 @@ function CreateSession() {
           {hourly && (
             <>
               <label style={{ maxWidth: 200 }}>
-                Courts booked per slot
+                Units booked per slot (courts, rooms, desks…)
                 <input
                   type="number"
                   min="0"
                   required
-                  value={courts}
-                  onChange={(e) => setCourts(e.target.value)}
+                  value={units}
+                  onChange={(e) => setUnits(e.target.value)}
                 />
               </label>
               <div>
@@ -128,7 +128,7 @@ function CreateSession() {
                 </div>
                 <p className="muted small" style={{ marginBottom: 0 }}>
                   {preview.length} slot{preview.length === 1 ? "" : "s"} · booking cost {money(estimated)}.
-                  You can change courts per slot afterwards.
+                  You can change units per slot afterwards.
                 </p>
               </div>
             </>

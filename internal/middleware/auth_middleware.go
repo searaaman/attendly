@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/searaaman/playledger/internal/config"
-	"github.com/searaaman/playledger/internal/services"
+	"github.com/searaaman/attendly/internal/config"
+	"github.com/searaaman/attendly/internal/services"
 )
 
 func AuthMiddleware() gin.HandlerFunc {

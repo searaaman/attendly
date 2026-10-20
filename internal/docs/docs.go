@@ -15,7 +15,7 @@ const uiPage = `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>PlayLedger API</title>
+  <title>Attendly API</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
 </head>
 <body>

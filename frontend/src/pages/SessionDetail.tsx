@@ -2,9 +2,9 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { errorMessage } from "../api/client";
 import {
-  assignPlayer,
+  assignMember,
   createPayment,
-  createPlayer,
+  createMember,
   createTimeSlot,
   deletePayment,
   deleteSession,
@@ -13,16 +13,16 @@ import {
   getSession,
   getSessionBilling,
   listPayments,
-  listPlayers,
-  removePlayer,
-  updateTimeSlotCourts,
+  listMembers,
+  removeMember,
+  updateTimeSlotUnits,
 } from "../api/endpoints";
 import Balance from "../components/Balance";
 import { ErrorBox, Loading } from "../components/Status";
 import { date, dateTime, isZero, money, time, timeRange } from "../lib/format";
-import { billedCost, perPlayerCost, playersOf, sessionPlayers, slotsOf } from "../lib/session";
+import { billedCost, perMemberCost, membersOf, sessionMembers, slotsOf } from "../lib/session";
 import { useLoad } from "../lib/useLoad";
-import type { Player, Session, TimeSlot } from "../types";
+import type { Member, Session, TimeSlot } from "../types";
 
 function SessionDetail() {
   const { id } = useParams();
@@ -35,7 +35,7 @@ function SessionDetail() {
         getSession(sessionId),
         getSessionBilling(sessionId),
         listPayments({ session_id: sessionId }),
-        listPlayers(),
+        listMembers(),
         getLedger(),
       ]),
     sessionId,
@@ -43,13 +43,13 @@ function SessionDetail() {
   const [error, setError] = useState<string | null>(null);
   // Cells, slots or rows with a request in flight, so we can disable them.
   const [busy, setBusy] = useState<Set<string>>(new Set());
-  // Players added to the grid who haven't been ticked into any slot yet.
-  const [extraRows, setExtraRows] = useState<Player[]>([]);
+  // Members added to the grid who haven't been ticked into any slot yet.
+  const [extraRows, setExtraRows] = useState<Member[]>([]);
 
   if (loadError) return <ErrorBox message={loadError} />;
   if (!data) return <Loading />;
 
-  const [session, bills, payments, allPlayers, ledger] = data;
+  const [session, bills, payments, allMembers, ledger] = data;
   const slots = slotsOf(session);
 
   const run = async (key: string, action: () => Promise<unknown>) => {
@@ -69,35 +69,35 @@ function SessionDetail() {
     }
   };
 
-  const inSlot = (slot: TimeSlot, playerId: number) =>
-    playersOf(slot).some((p) => p.id === playerId);
+  const inSlot = (slot: TimeSlot, memberId: number) =>
+    membersOf(slot).some((p) => p.id === memberId);
 
-  const toggle = (slot: TimeSlot, player: Player) =>
-    run(`cell-${slot.id}-${player.id}`, () =>
-      inSlot(slot, player.id) ? removePlayer(slot.id, player.id) : assignPlayer(slot.id, player.id),
+  const toggle = (slot: TimeSlot, member: Member) =>
+    run(`cell-${slot.id}-${member.id}`, () =>
+      inSlot(slot, member.id) ? removeMember(slot.id, member.id) : assignMember(slot.id, member.id),
     );
 
-  const setRow = (player: Player, on: boolean) =>
-    run(`row-${player.id}`, () =>
+  const setRow = (member: Member, on: boolean) =>
+    run(`row-${member.id}`, () =>
       Promise.all(
         slots
-          .filter((slot) => inSlot(slot, player.id) !== on)
-          .map((slot) => (on ? assignPlayer(slot.id, player.id) : removePlayer(slot.id, player.id))),
+          .filter((slot) => inSlot(slot, member.id) !== on)
+          .map((slot) => (on ? assignMember(slot.id, member.id) : removeMember(slot.id, member.id))),
       ),
     );
 
-  const gridPlayers = [...sessionPlayers(session)];
-  for (const player of extraRows) {
-    if (!gridPlayers.some((p) => p.id === player.id)) gridPlayers.push(player);
+  const gridMembers = [...sessionMembers(session)];
+  for (const member of extraRows) {
+    if (!gridMembers.some((p) => p.id === member.id)) gridMembers.push(member);
   }
-  const available = allPlayers.filter((p) => !gridPlayers.some((g) => g.id === p.id));
+  const available = allMembers.filter((p) => !gridMembers.some((g) => g.id === p.id));
 
   const paidInSession = payments.reduce((total, p) => total + p.amount, 0);
   const billedTotal = billedCost(session);
-  const balanceOf = (playerId: number) =>
-    ledger.find((entry) => entry.player_id === playerId)?.balance ?? 0;
-  const paidBy = (playerId: number) =>
-    payments.filter((p) => p.player_id === playerId).reduce((total, p) => total + p.amount, 0);
+  const balanceOf = (memberId: number) =>
+    ledger.find((entry) => entry.member_id === memberId)?.balance ?? 0;
+  const paidBy = (memberId: number) =>
+    payments.filter((p) => p.member_id === memberId).reduce((total, p) => total + p.amount, 0);
 
   const handleDeleteSession = async () => {
     if (!confirm("Delete this session, its slots and attendance?")) return;
@@ -118,7 +118,7 @@ function SessionDetail() {
           </p>
           <h1>{date(session.start_time)}</h1>
           <p className="muted">
-            {timeRange(session.start_time, session.end_time)} · {money(session.court_price)} per court per hour
+            {timeRange(session.start_time, session.end_time)} · {money(session.unit_rate)} per unit per hour
           </p>
         </div>
         <button className="btn btn-danger btn-sm" onClick={handleDeleteSession}>
@@ -130,8 +130,8 @@ function SessionDetail() {
 
       <div className="stats">
         <div className="stat">
-          <div className="stat-label">Players</div>
-          <div className="stat-value">{sessionPlayers(session).length}</div>
+          <div className="stat-label">Members</div>
+          <div className="stat-value">{sessionMembers(session).length}</div>
         </div>
         <div className="stat">
           <div className="stat-label">Billed</div>
@@ -154,7 +154,7 @@ function SessionDetail() {
           <div>
             <h2>Attendance</h2>
             <p className="muted small" style={{ margin: "2px 0 0" }}>
-              Tap a cell to mark who played in each slot. Each slot's court cost is split between its players.
+              Tap a cell to mark who attended each slot. Each slot's booking cost is split between the members present.
             </p>
           </div>
         </div>
@@ -166,14 +166,14 @@ function SessionDetail() {
             <table>
               <thead>
                 <tr>
-                  <th className="player-col">Player</th>
+                  <th className="member-col">Member</th>
                   {slots.map((slot) => (
                     <th key={slot.id}>
                       <SlotHeader
                         slot={slot}
                         disabled={busy.has(`slot-${slot.id}`)}
-                        onCourts={(courts) =>
-                          run(`slot-${slot.id}`, () => updateTimeSlotCourts(slot.id, courts))
+                        onUnits={(units) =>
+                          run(`slot-${slot.id}`, () => updateTimeSlotUnits(slot.id, units))
                         }
                         onDelete={() => {
                           if (confirm(`Delete the ${timeRange(slot.start_time, slot.end_time)} slot?`)) {
@@ -187,33 +187,33 @@ function SessionDetail() {
                 </tr>
               </thead>
               <tbody>
-                {gridPlayers.length === 0 && (
+                {gridMembers.length === 0 && (
                   <tr>
                     <td className="empty" colSpan={slots.length + 2}>
-                      Add the players who turned up.
+                      Add the members who turned up.
                     </td>
                   </tr>
                 )}
-                {gridPlayers.map((player) => {
-                  const played = slots.filter((slot) => inSlot(slot, player.id)).length;
-                  const rowBusy = busy.has(`row-${player.id}`);
+                {gridMembers.map((member) => {
+                  const attended = slots.filter((slot) => inSlot(slot, member.id)).length;
+                  const rowBusy = busy.has(`row-${member.id}`);
                   return (
-                    <tr key={player.id}>
-                      <td className="player-col">
-                        <div className="player-name">
-                          <Link to={`/players/${player.id}`}>{player.name}</Link>
+                    <tr key={member.id}>
+                      <td className="member-col">
+                        <div className="member-name">
+                          <Link to={`/members/${member.id}`}>{member.name}</Link>
                         </div>
                       </td>
                       {slots.map((slot) => {
-                        const on = inSlot(slot, player.id);
+                        const on = inSlot(slot, member.id);
                         return (
                           <td key={slot.id}>
                             <button
                               className={`cell ${on ? "on" : ""}`}
                               aria-pressed={on}
-                              aria-label={`${player.name} ${timeRange(slot.start_time, slot.end_time)}`}
-                              disabled={rowBusy || busy.has(`cell-${slot.id}-${player.id}`)}
-                              onClick={() => toggle(slot, player)}
+                              aria-label={`${member.name} ${timeRange(slot.start_time, slot.end_time)}`}
+                              disabled={rowBusy || busy.has(`cell-${slot.id}-${member.id}`)}
+                              onClick={() => toggle(slot, member)}
                             >
                               ●
                             </button>
@@ -224,9 +224,9 @@ function SessionDetail() {
                         <button
                           className="btn btn-ghost btn-sm"
                           disabled={rowBusy}
-                          onClick={() => setRow(player, played < slots.length)}
+                          onClick={() => setRow(member, attended < slots.length)}
                         >
-                          {played < slots.length ? "All" : "None"}
+                          {attended < slots.length ? "All" : "None"}
                         </button>
                       </td>
                     </tr>
@@ -235,13 +235,13 @@ function SessionDetail() {
               </tbody>
               <tfoot>
                 <tr>
-                  <td className="player-col">Each pays</td>
+                  <td className="member-col">Each pays</td>
                   {slots.map((slot) => {
-                    const cost = perPlayerCost(session, slot);
+                    const cost = perMemberCost(session, slot);
                     return (
                       <td key={slot.id} className="num" style={{ textAlign: "center" }}>
                         {cost === null ? "—" : money(cost)}
-                        <div>{playersOf(slot).length} playing</div>
+                        <div>{membersOf(slot).length} present</div>
                       </td>
                     );
                   })}
@@ -252,9 +252,9 @@ function SessionDetail() {
           </div>
         )}
 
-        <AddPlayerRow
+        <AddMemberRow
           available={available}
-          onAdd={(player) => setExtraRows((rows) => [...rows, player])}
+          onAdd={(member) => setExtraRows((rows) => [...rows, member])}
           onError={setError}
         />
       </section>
@@ -271,13 +271,13 @@ function SessionDetail() {
           </div>
         </div>
         {bills.length === 0 ? (
-          <p className="empty">Nobody has been marked as playing yet.</p>
+          <p className="empty">No attendance marked yet.</p>
         ) : (
           <div className="table-wrap" style={{ marginTop: 12 }}>
             <table>
               <thead>
                 <tr>
-                  <th>Player</th>
+                  <th>Member</th>
                   <th className="num">This session</th>
                   <th className="num">Paid here</th>
                   <th className="num">Overall</th>
@@ -286,24 +286,24 @@ function SessionDetail() {
               </thead>
               <tbody>
                 {bills.map((bill) => {
-                  const balance = balanceOf(bill.player_id);
+                  const balance = balanceOf(bill.member_id);
                   return (
-                    <tr key={bill.player_id}>
+                    <tr key={bill.member_id}>
                       <td>
-                        <Link to={`/players/${bill.player_id}`}>{bill.name}</Link>
+                        <Link to={`/members/${bill.member_id}`}>{bill.name}</Link>
                       </td>
                       <td className="num">{money(bill.amount)}</td>
-                      <td className="num">{money(paidBy(bill.player_id))}</td>
+                      <td className="num">{money(paidBy(bill.member_id))}</td>
                       <td className="num">
                         <Balance amount={balance} />
                       </td>
                       <td>
                         <PayForm
                           suggested={balance < 0 && !isZero(balance) ? -balance : 0}
-                          disabled={busy.has(`pay-${bill.player_id}`)}
+                          disabled={busy.has(`pay-${bill.member_id}`)}
                           onPay={(amount) =>
-                            run(`pay-${bill.player_id}`, () =>
-                              createPayment(bill.player_id, session.id, amount),
+                            run(`pay-${bill.member_id}`, () =>
+                              createPayment(bill.member_id, session.id, amount),
                             )
                           }
                         />
@@ -326,7 +326,7 @@ function SessionDetail() {
                 <tbody>
                   {payments.map((payment) => (
                     <tr key={payment.id}>
-                      <td>{payment.player?.name ?? `Player #${payment.player_id}`}</td>
+                      <td>{payment.member?.name ?? `Member #${payment.member_id}`}</td>
                       <td className="muted small">{dateTime(payment.created_at)}</td>
                       <td className="num">{money(payment.amount)}</td>
                       <td className="num">
@@ -357,12 +357,12 @@ function SessionDetail() {
 function SlotHeader({
   slot,
   disabled,
-  onCourts,
+  onUnits,
   onDelete,
 }: {
   slot: TimeSlot;
   disabled: boolean;
-  onCourts: (courts: number) => void;
+  onUnits: (units: number) => void;
   onDelete: () => void;
 }) {
   return (
@@ -370,21 +370,21 @@ function SlotHeader({
       <span className="slot-time">
         {time(slot.start_time)}–{time(slot.end_time)}
       </span>
-      <span className="courts">
+      <span className="units">
         <button
           className="icon-btn"
-          aria-label="One court fewer"
-          disabled={disabled || slot.courts_booked === 0}
-          onClick={() => onCourts(slot.courts_booked - 1)}
+          aria-label="One unit fewer"
+          disabled={disabled || slot.units_booked === 0}
+          onClick={() => onUnits(slot.units_booked - 1)}
         >
           −
         </button>
-        {slot.courts_booked} court{slot.courts_booked === 1 ? "" : "s"}
+        {slot.units_booked} unit{slot.units_booked === 1 ? "" : "s"}
         <button
           className="icon-btn"
-          aria-label="One court more"
+          aria-label="One unit more"
           disabled={disabled}
-          onClick={() => onCourts(slot.courts_booked + 1)}
+          onClick={() => onUnits(slot.units_booked + 1)}
         >
           +
         </button>
@@ -396,13 +396,13 @@ function SlotHeader({
   );
 }
 
-function AddPlayerRow({
+function AddMemberRow({
   available,
   onAdd,
   onError,
 }: {
-  available: Player[];
-  onAdd: (player: Player) => void;
+  available: Member[];
+  onAdd: (member: Member) => void;
   onError: (message: string) => void;
 }) {
   const [selected, setSelected] = useState("");
@@ -410,8 +410,8 @@ function AddPlayerRow({
   const [busy, setBusy] = useState(false);
 
   const addExisting = () => {
-    const player = available.find((p) => p.id === Number(selected));
-    if (player) onAdd(player);
+    const member = available.find((p) => p.id === Number(selected));
+    if (member) onAdd(member);
     setSelected("");
   };
 
@@ -420,7 +420,7 @@ function AddPlayerRow({
     if (!newName.trim()) return;
     setBusy(true);
     try {
-      onAdd(await createPlayer(newName.trim(), ""));
+      onAdd(await createMember(newName.trim(), ""));
       setNewName("");
     } catch (err) {
       onError(errorMessage(err));
@@ -430,12 +430,12 @@ function AddPlayerRow({
   };
 
   return (
-    <div className="add-player">
-      <select value={selected} onChange={(e) => setSelected(e.target.value)} aria-label="Add a player">
-        <option value="">Add a player…</option>
-        {available.map((player) => (
-          <option key={player.id} value={player.id}>
-            {player.name}
+    <div className="add-member">
+      <select value={selected} onChange={(e) => setSelected(e.target.value)} aria-label="Add a member">
+        <option value="">Add a member…</option>
+        {available.map((member) => (
+          <option key={member.id} value={member.id}>
+            {member.name}
           </option>
         ))}
       </select>
@@ -444,7 +444,7 @@ function AddPlayerRow({
       </button>
       <form className="row" style={{ flex: 1, flexWrap: "nowrap" }} onSubmit={addNew}>
         <input
-          placeholder="or a new player's name"
+          placeholder="or a new member's name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
         />
@@ -468,7 +468,7 @@ function AddSlotForm({
   const [open, setOpen] = useState(false);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
-  const [courts, setCourts] = useState("1");
+  const [units, setUnits] = useState("1");
   const [busy, setBusy] = useState(false);
 
   // Slot times are entered as times of day and placed on the session's date,
@@ -492,7 +492,7 @@ function AddSlotForm({
       await createTimeSlot(session.id, {
         start_time: startDate.toISOString(),
         end_time: endDate.toISOString(),
-        courts_booked: Number(courts),
+        units_booked: Number(units),
       });
       setStart("");
       setEnd("");
@@ -530,8 +530,8 @@ function AddSlotForm({
           <input type="time" required value={end} onChange={(e) => setEnd(e.target.value)} />
         </label>
         <label>
-          Courts booked
-          <input type="number" min="0" required value={courts} onChange={(e) => setCourts(e.target.value)} />
+          Units booked
+          <input type="number" min="0" required value={units} onChange={(e) => setUnits(e.target.value)} />
         </label>
       </div>
       <div className="form-actions">

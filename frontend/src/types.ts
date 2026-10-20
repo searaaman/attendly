@@ -1,6 +1,6 @@
 // Shapes returned by the Go API. Keep in sync with internal/domain.
 
-export interface Player {
+export interface Member {
   id: number;
   name: string;
   phone: string;
@@ -11,31 +11,31 @@ export interface TimeSlot {
   session_id: number;
   start_time: string;
   end_time: string;
-  courts_booked: number;
-  players: Player[] | null;
+  units_booked: number;
+  members: Member[] | null;
 }
 
 export interface Session {
   id: number;
   start_time: string;
   end_time: string;
-  court_price: number;
+  unit_rate: number;
   time_slots: TimeSlot[] | null;
 }
 
-export interface PlayerBill {
-  player_id: number;
+export interface MemberBill {
+  member_id: number;
   name: string;
   amount: number;
 }
 
 export interface LedgerEntry {
-  player_id: number;
+  member_id: number;
   name: string;
   phone: string;
   total_bill: number;
   total_paid: number;
-  // total_paid - total_bill: negative means the player owes money.
+  // total_paid - total_bill: negative means the member owes money.
   balance: number;
 }
 
@@ -48,18 +48,18 @@ export interface SessionCharge {
   paid: number;
 }
 
-export interface PlayerLedger extends LedgerEntry {
+export interface MemberLedger extends LedgerEntry {
   sessions: SessionCharge[];
   payments: Payment[];
 }
 
 export interface Payment {
   id: number;
-  player_id: number;
+  member_id: number;
   session_id: number;
   amount: number;
   created_at: string;
-  player?: Player;
+  member?: Member;
 }
 
 export interface User {

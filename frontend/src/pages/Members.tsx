@@ -1,13 +1,13 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { errorMessage } from "../api/client";
-import { createPlayer, getLedger } from "../api/endpoints";
+import { createMember, getLedger } from "../api/endpoints";
 import Balance from "../components/Balance";
 import { ErrorBox, Loading } from "../components/Status";
 import { money } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 
-function Players() {
+function Members() {
   const navigate = useNavigate();
   const { data: ledger, error: loadError, reload } = useLoad(getLedger);
   const [search, setSearch] = useState("");
@@ -21,7 +21,7 @@ function Players() {
     setBusy(true);
     setError(null);
     try {
-      await createPlayer(name.trim(), phone.trim());
+      await createMember(name.trim(), phone.trim());
       setName("");
       setPhone("");
       reload();
@@ -40,14 +40,14 @@ function Players() {
     <div className="stack">
       <div className="page-head">
         <div>
-          <h1>Players</h1>
-          <p className="muted">Balances include every session played and every payment made.</p>
+          <h1>Members</h1>
+          <p className="muted">Balances include every session attended and every payment made.</p>
         </div>
       </div>
 
       <form className="card" onSubmit={handleAdd}>
         <div className="card-head">
-          <h2>Add player</h2>
+          <h2>Add member</h2>
         </div>
         <ErrorBox message={error} />
         <div className="row" style={{ alignItems: "flex-end" }}>
@@ -67,7 +67,7 @@ function Players() {
 
       <section className="card card-flush">
         <div className="card-head">
-          <h2>All players</h2>
+          <h2>All members</h2>
           <input
             type="search"
             placeholder="Search"
@@ -78,7 +78,7 @@ function Players() {
         </div>
         <ErrorBox message={loadError} />
         {!ledger && !loadError && <Loading />}
-        {ledger && rows.length === 0 && <p className="empty">No players found.</p>}
+        {ledger && rows.length === 0 && <p className="empty">No members found.</p>}
         {rows.length > 0 && (
           <div className="table-wrap" style={{ marginTop: 12 }}>
             <table>
@@ -94,9 +94,9 @@ function Players() {
               <tbody>
                 {rows.map((entry) => (
                   <tr
-                    key={entry.player_id}
+                    key={entry.member_id}
                     className="clickable"
-                    onClick={() => navigate(`/players/${entry.player_id}`)}
+                    onClick={() => navigate(`/members/${entry.member_id}`)}
                   >
                     <td style={{ fontWeight: 500 }}>{entry.name}</td>
                     <td className="muted hide-sm">{entry.phone || "—"}</td>
@@ -116,4 +116,4 @@ function Players() {
   );
 }
 
-export default Players;
+export default Members;

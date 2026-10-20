@@ -14,15 +14,15 @@ function Layout() {
       <header className="topbar">
         <div className="topbar-inner">
           <NavLink to="/" className="brand">
-            <span className="brand-ball" aria-hidden="true" />
-            PlayLedger
+            <span className="brand-mark" aria-hidden="true" />
+            Attendly
           </NavLink>
           <nav className="nav">
             <NavLink to="/" end>
               Dashboard
             </NavLink>
             <NavLink to="/sessions">Sessions</NavLink>
-            <NavLink to="/players">Players</NavLink>
+            <NavLink to="/members">Members</NavLink>
           </nav>
           <div className="topbar-user">
             <span className="muted hide-sm">{getUserName()}</span>

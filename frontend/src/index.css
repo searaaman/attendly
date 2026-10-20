@@ -9,8 +9,8 @@
   --primary-hover: #175838;
   --primary-soft: #e3f1e8;
   --primary-contrast: #ffffff;
-  --ball: #d7ee3f;
-  --ball-ink: #2f3a00;
+  --highlight: #d7ee3f;
+  --highlight-ink: #2f3a00;
   --owes: #b4322a;
   --owes-soft: #fbe9e7;
   --credit: #1d6b45;
@@ -40,8 +40,8 @@
     --primary-hover: #63cf95;
     --primary-soft: #1d3326;
     --primary-contrast: #0b1a10;
-    --ball: #d7ee3f;
-    --ball-ink: #2f3a00;
+    --highlight: #d7ee3f;
+    --highlight-ink: #2f3a00;
     --owes: #f07b70;
     --owes-soft: #3a1f1c;
     --credit: #6fd49c;
@@ -138,12 +138,11 @@ th.num {
   text-decoration: none;
 }
 
-.brand-ball {
+.brand-mark {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  background: var(--ball);
-  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.12);
+  border-radius: 5px;
+  background: var(--highlight);
 }
 
 .nav {
@@ -625,7 +624,7 @@ button:focus-visible {
   vertical-align: top;
 }
 
-.attendance .player-col {
+.attendance .member-col {
   text-align: left;
   position: sticky;
   left: 0;
@@ -635,7 +634,7 @@ button:focus-visible {
   padding-left: 16px;
 }
 
-.attendance th.player-col {
+.attendance th.member-col {
   background: var(--surface-2);
 }
 
@@ -653,7 +652,7 @@ button:focus-visible {
   white-space: nowrap;
 }
 
-.courts {
+.units {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -662,7 +661,7 @@ button:focus-visible {
   white-space: nowrap;
 }
 
-.courts .icon-btn {
+.units .icon-btn {
   width: 22px;
   height: 22px;
   font-size: 0.85rem;
@@ -688,9 +687,9 @@ button:focus-visible {
 }
 
 .cell.on {
-  background: var(--ball);
+  background: var(--highlight);
   border: 1.5px solid transparent;
-  color: var(--ball-ink);
+  color: var(--highlight-ink);
 }
 
 .cell:disabled {
@@ -705,11 +704,11 @@ button:focus-visible {
   border-bottom: none;
 }
 
-.attendance tfoot .player-col {
+.attendance tfoot .member-col {
   background: var(--surface-2);
 }
 
-.player-name {
+.member-name {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -717,7 +716,7 @@ button:focus-visible {
   font-weight: 500;
 }
 
-.add-player {
+.add-member {
   display: flex;
   gap: 8px;
   padding: 14px 16px;
@@ -725,8 +724,8 @@ button:focus-visible {
   flex-wrap: wrap;
 }
 
-.add-player select,
-.add-player input {
+.add-member select,
+.add-member input {
   width: auto;
   flex: 1;
   min-width: 160px;

@@ -4,14 +4,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/searaaman/playledger/internal/domain"
+	"github.com/searaaman/attendly/internal/domain"
 )
 
 var (
-	rahul = domain.Player{ID: 1, Name: "Rahul"}
-	akhil = domain.Player{ID: 2, Name: "Akhil"}
-	anand = domain.Player{ID: 3, Name: "Anand"}
-	kiran = domain.Player{ID: 4, Name: "Kiran"}
+	rahul = domain.Member{ID: 1, Name: "Rahul"}
+	akhil = domain.Member{ID: 2, Name: "Akhil"}
+	anand = domain.Member{ID: 3, Name: "Anand"}
+	kiran = domain.Member{ID: 4, Name: "Kiran"}
 )
 
 func ledgerSessions() []domain.Session {
@@ -19,16 +19,16 @@ func ledgerSessions() []domain.Session {
 	day2 := day1.AddDate(0, 0, 7)
 	return []domain.Session{
 		{
-			ID: 1, StartTime: day1, EndTime: day1.Add(2 * time.Hour), CourtPrice: 300,
+			ID: 1, StartTime: day1, EndTime: day1.Add(2 * time.Hour), UnitRate: 300,
 			TimeSlots: []domain.TimeSlot{
-				{CourtsBooked: 2, Players: []domain.Player{rahul, akhil, anand}},
-				{CourtsBooked: 1, Players: []domain.Player{rahul, anand}},
+				{UnitsBooked: 2, Members: []domain.Member{rahul, akhil, anand}},
+				{UnitsBooked: 1, Members: []domain.Member{rahul, anand}},
 			},
 		},
 		{
-			ID: 2, StartTime: day2, EndTime: day2.Add(time.Hour), CourtPrice: 250,
+			ID: 2, StartTime: day2, EndTime: day2.Add(time.Hour), UnitRate: 250,
 			TimeSlots: []domain.TimeSlot{
-				{CourtsBooked: 1, Players: []domain.Player{rahul}},
+				{UnitsBooked: 1, Members: []domain.Member{rahul}},
 			},
 		},
 	}
@@ -36,15 +36,15 @@ func ledgerSessions() []domain.Session {
 
 func TestBuildLedgerCarriesForwardUnpaidBalance(t *testing.T) {
 	payments := []domain.Payment{
-		{PlayerID: 1, SessionID: 1, Amount: 300},
-		{PlayerID: 2, SessionID: 1, Amount: 200},
+		{MemberID: 1, SessionID: 1, Amount: 300},
+		{MemberID: 2, SessionID: 1, Amount: 200},
 	}
 
-	ledger := BuildLedger([]domain.Player{rahul, akhil, anand, kiran}, ledgerSessions(), payments)
+	ledger := BuildLedger([]domain.Member{rahul, akhil, anand, kiran}, ledgerSessions(), payments)
 
 	byID := make(map[uint]domain.LedgerEntry)
 	for _, entry := range ledger {
-		byID[entry.PlayerID] = entry
+		byID[entry.MemberID] = entry
 	}
 
 	// Rahul: 350 + 250 billed, 300 paid, so the 50 from session 1 carries into session 2.
@@ -57,24 +57,24 @@ func TestBuildLedgerCarriesForwardUnpaidBalance(t *testing.T) {
 	if got := byID[3]; got.Balance != -350 {
 		t.Errorf("Anand: expected -350, got %+v", got)
 	}
-	// Players who never played still appear, with a zero balance.
+	// Members who never attended still appear, with a zero balance.
 	if got, ok := byID[4]; !ok || got.Balance != 0 {
 		t.Errorf("Kiran: expected zero entry, got %+v (present=%v)", got, ok)
 	}
 
 	// Biggest debt first.
-	if ledger[0].PlayerID != 3 {
+	if ledger[0].MemberID != 3 {
 		t.Errorf("expected Anand (owes 350) first, got %s", ledger[0].Name)
 	}
 }
 
-func TestBuildPlayerLedgerBreaksDownBySession(t *testing.T) {
+func TestBuildMemberLedgerBreaksDownBySession(t *testing.T) {
 	payments := []domain.Payment{
-		{PlayerID: 1, SessionID: 1, Amount: 300},
-		{PlayerID: 2, SessionID: 1, Amount: 200},
+		{MemberID: 1, SessionID: 1, Amount: 300},
+		{MemberID: 2, SessionID: 1, Amount: 200},
 	}
 
-	ledger := BuildPlayerLedger(rahul, ledgerSessions(), payments)
+	ledger := BuildMemberLedger(rahul, ledgerSessions(), payments)
 
 	if ledger.TotalBill != 600 || ledger.TotalPaid != 300 || ledger.Balance != -300 {
 		t.Errorf("unexpected totals %+v", ledger.LedgerEntry)
@@ -95,8 +95,8 @@ func TestBuildPlayerLedgerBreaksDownBySession(t *testing.T) {
 	}
 }
 
-func TestBuildPlayerLedgerSkipsSessionsPlayerWasNotIn(t *testing.T) {
-	ledger := BuildPlayerLedger(akhil, ledgerSessions(), nil)
+func TestBuildMemberLedgerSkipsSessionsMemberWasNotIn(t *testing.T) {
+	ledger := BuildMemberLedger(akhil, ledgerSessions(), nil)
 
 	if len(ledger.Sessions) != 1 || ledger.Sessions[0].SessionID != 1 {
 		t.Errorf("expected only session 1, got %+v", ledger.Sessions)
