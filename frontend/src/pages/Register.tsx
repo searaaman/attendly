@@ -30,11 +30,15 @@ function Register() {
 
   return (
     <div className="auth">
-      <div className="card auth-card">
+      <div className="auth-card">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true" />
           Attendly
         </div>
+        <p className="auth-intro">
+          Mark who attended each hour of a booking, split the cost fairly, and keep track of who
+          has paid.
+        </p>
         <ErrorBox message={error} />
         <form onSubmit={handleSubmit}>
           <label>
