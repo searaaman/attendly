@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/searaaman/playledger/internal/domain"
+	"github.com/searaaman/attendly/internal/domain"
 )
 
 func TestBuildHourlySlots(t *testing.T) {
@@ -20,8 +20,8 @@ func TestBuildHourlySlots(t *testing.T) {
 		if !slot.StartTime.Equal(wantStart) || !slot.EndTime.Equal(wantStart.Add(time.Hour)) {
 			t.Errorf("slot %d: got %v-%v", i, slot.StartTime, slot.EndTime)
 		}
-		if slot.CourtsBooked != 2 {
-			t.Errorf("slot %d: expected 2 courts, got %d", i, slot.CourtsBooked)
+		if slot.UnitsBooked != 2 {
+			t.Errorf("slot %d: expected 2 units, got %d", i, slot.UnitsBooked)
 		}
 	}
 }
@@ -54,7 +54,7 @@ func TestNewSessionWithoutHourlySlots(t *testing.T) {
 	start := time.Date(2026, 9, 1, 18, 0, 0, 0, time.UTC)
 
 	session, err := NewSession(domain.CreateSessionRequest{
-		StartTime: start, EndTime: start.Add(2 * time.Hour), CourtPrice: 300,
+		StartTime: start, EndTime: start.Add(2 * time.Hour), UnitRate: 300,
 	})
 
 	if err != nil {

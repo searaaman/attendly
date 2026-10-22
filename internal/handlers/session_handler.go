@@ -5,17 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/searaaman/playledger/internal/config"
-	"github.com/searaaman/playledger/internal/domain"
-	"github.com/searaaman/playledger/internal/services"
+	"github.com/searaaman/attendly/internal/config"
+	"github.com/searaaman/attendly/internal/domain"
+	"github.com/searaaman/attendly/internal/services"
 	"gorm.io/gorm"
 )
 
-// withSlots preloads a session's slots in time order, and the players in each slot.
+// withSlots preloads a session's slots in time order, and the members in each slot.
 func withSlots(db *gorm.DB) *gorm.DB {
 	return db.
 		Preload("TimeSlots", func(db *gorm.DB) *gorm.DB { return db.Order("start_time, id") }).
-		Preload("TimeSlots.Players", func(db *gorm.DB) *gorm.DB { return db.Order("name") })
+		Preload("TimeSlots.Members", func(db *gorm.DB) *gorm.DB { return db.Order("name") })
 }
 
 func loadSession(ctx *gin.Context, sessionID uint) (domain.Session, bool) {
@@ -137,11 +137,11 @@ func CreateTimeSlot(ctx *gin.Context) {
 	}
 
 	timeSlot := domain.TimeSlot{
-		SessionID:    sessionID,
-		StartTime:    request.StartTime,
-		EndTime:      request.EndTime,
-		CourtsBooked: request.CourtsBooked,
-		Players:      []domain.Player{},
+		SessionID:   sessionID,
+		StartTime:   request.StartTime,
+		EndTime:     request.EndTime,
+		UnitsBooked: request.UnitsBooked,
+		Members:     []domain.Member{},
 	}
 	if err := config.DB.Create(&timeSlot).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -174,7 +174,7 @@ func UpdateTimeSlot(ctx *gin.Context) {
 		return
 	}
 
-	err := config.DB.Model(&timeSlot).Update("courtsbooked", request.CourtsBooked).Error
+	err := config.DB.Model(&timeSlot).Update("units_booked", request.UnitsBooked).Error
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "failed to update timeslot",

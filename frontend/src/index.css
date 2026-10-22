@@ -1,54 +1,30 @@
 :root {
-  --bg: #f4f6f1;
+  --bg: #fafbf9;
   --surface: #ffffff;
-  --surface-2: #f0f3ec;
-  --border: #dfe4d8;
-  --text: #1c2419;
-  --muted: #62705c;
-  --primary: #1d6b45;
-  --primary-hover: #175838;
-  --primary-soft: #e3f1e8;
+  --surface-2: #f2f5f1;
+  --border: #dde3ea;
+  --line: #c9d2dc;
+  --text: #2b3445;
+  --muted: #6b7587;
+  --primary: #5b8def;
+  --primary-hover: #4a7de0;
+  --primary-soft: #eaf0fd;
   --primary-contrast: #ffffff;
-  --ball: #d7ee3f;
-  --ball-ink: #2f3a00;
-  --owes: #b4322a;
-  --owes-soft: #fbe9e7;
-  --credit: #1d6b45;
-  --credit-soft: #e3f1e8;
-  --shadow: 0 1px 2px rgba(20, 30, 15, 0.06), 0 4px 16px rgba(20, 30, 15, 0.05);
-  --radius: 12px;
-  --radius-sm: 8px;
+  --highlight: #5b8def;
+  --owes: #d0463e;
+  --owes-soft: #fbeceb;
+  --credit: #3a8a5c;
+  --credit-soft: #e6f3eb;
+  --radius: 10px;
+  --radius-sm: 6px;
 
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 15px;
+  font-family: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--text);
   background: var(--bg);
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #111510;
-    --surface: #191e17;
-    --surface-2: #20271d;
-    --border: #2d3629;
-    --text: #e8ede4;
-    --muted: #97a490;
-    --primary: #4cbf82;
-    --primary-hover: #63cf95;
-    --primary-soft: #1d3326;
-    --primary-contrast: #0b1a10;
-    --ball: #d7ee3f;
-    --ball-ink: #2f3a00;
-    --owes: #f07b70;
-    --owes-soft: #3a1f1c;
-    --credit: #6fd49c;
-    --credit-soft: #1d3326;
-    --shadow: none;
-    color-scheme: dark;
-  }
 }
 
 * {
@@ -69,7 +45,10 @@ h3 {
 }
 
 h1 {
-  font-size: 1.6rem;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 h2 {
@@ -111,15 +90,15 @@ th.num {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
 }
 
 .topbar-inner {
-  max-width: 1100px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 16px;
-  height: 56px;
+  height: 60px;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -129,8 +108,9 @@ th.num {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
@@ -138,25 +118,23 @@ th.num {
   text-decoration: none;
 }
 
-.brand-ball {
-  width: 18px;
-  height: 18px;
+.brand-mark {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: var(--ball);
-  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.12);
+  background: var(--highlight);
 }
 
 .nav {
   display: flex;
-  gap: 4px;
+  gap: 20px;
   flex: 1;
 }
 
 .nav a {
-  padding: 6px 12px;
-  border-radius: 999px;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
   color: var(--muted);
-  font-weight: 500;
 }
 
 .nav a:hover {
@@ -165,8 +143,8 @@ th.num {
 }
 
 .nav a.active {
-  background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--text);
+  border-bottom-color: var(--primary);
 }
 
 .topbar-user {
@@ -176,9 +154,9 @@ th.num {
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  padding: 32px 16px 64px;
 }
 
 .page-head {
@@ -227,7 +205,6 @@ th.num {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
   padding: 20px;
 }
 
@@ -256,22 +233,19 @@ th.num {
 }
 
 .stat {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  box-shadow: var(--shadow);
+  border-left: 1px solid var(--line);
+  padding: 2px 16px;
 }
 
 .stat-label {
   color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .stat-value {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   margin-top: 2px;
 }
@@ -300,12 +274,10 @@ td {
 }
 
 th {
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  background: var(--surface-2);
+  border-bottom-color: var(--line);
 }
 
 tbody tr:last-child td {
@@ -330,27 +302,21 @@ tr.clickable:hover td {
 
 .pill {
   display: inline-block;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .pill-owes {
-  background: var(--owes-soft);
   color: var(--owes);
 }
 
 .pill-credit {
-  background: var(--credit-soft);
   color: var(--credit);
 }
 
 .pill-neutral {
-  background: var(--surface-2);
-  color: var(--muted);
+  color: var(--credit);
 }
 
 /* Forms */
@@ -395,7 +361,7 @@ input:focus,
 select:focus,
 button:focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .form-grid {
@@ -415,7 +381,7 @@ button:focus-visible {
 
 .btn {
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -444,7 +410,7 @@ button:focus-visible {
 .btn-secondary {
   background: var(--surface);
   color: var(--text);
-  border-color: var(--border);
+  border-color: var(--line);
 }
 
 .btn-secondary:hover {
@@ -527,22 +493,21 @@ button:focus-visible {
 /* Auth pages */
 
 .auth {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px 16px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12vh 16px 48px;
 }
 
 .auth-card {
-  width: 100%;
-  max-width: 380px;
+  max-width: 360px;
 }
 
 .auth-card .brand {
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  justify-content: center;
+  font-size: 2.4rem;
+  letter-spacing: -0.03em;
+  margin-bottom: 28px;
 }
+
 
 .auth-card form {
   display: flex;
@@ -555,8 +520,7 @@ button:focus-visible {
 }
 
 .auth-foot {
-  text-align: center;
-  margin-top: 16px;
+  margin-top: 18px;
   font-size: 0.9rem;
 }
 
@@ -583,11 +547,6 @@ button:focus-visible {
 }
 
 .date-badge {
-  text-align: center;
-  border-radius: var(--radius-sm);
-  background: var(--primary-soft);
-  color: var(--primary);
-  padding: 6px 0;
   line-height: 1.1;
 }
 
@@ -597,9 +556,8 @@ button:focus-visible {
 }
 
 .date-badge .mon {
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
 /* Attendance grid */
@@ -619,13 +577,12 @@ button:focus-visible {
 }
 
 .attendance th {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   vertical-align: top;
+  border-bottom: 1px dashed var(--line);
 }
 
-.attendance .player-col {
+.attendance .member-col {
   text-align: left;
   position: sticky;
   left: 0;
@@ -635,9 +592,7 @@ button:focus-visible {
   padding-left: 16px;
 }
 
-.attendance th.player-col {
-  background: var(--surface-2);
-}
+
 
 .slot-head {
   display: flex;
@@ -649,11 +604,12 @@ button:focus-visible {
 }
 
 .slot-time {
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 1.1rem;
   white-space: nowrap;
 }
 
-.courts {
+.units {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -662,25 +618,30 @@ button:focus-visible {
   white-space: nowrap;
 }
 
-.courts .icon-btn {
+.units .icon-btn {
   width: 22px;
   height: 22px;
   font-size: 0.85rem;
 }
 
 .cell {
-  width: 44px;
-  height: 36px;
-  border-radius: 8px;
-  border: 1.5px dashed var(--border);
-  background: transparent;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  box-shadow: inset 0 1px 2px rgba(43, 52, 69, 0.08);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: transparent;
   font-size: 1rem;
-  transition: background 0.1s;
+  transition: transform 0.12s ease;
+}
+
+.cell:active {
+  transform: scale(0.85);
 }
 
 .cell:hover {
@@ -688,9 +649,9 @@ button:focus-visible {
 }
 
 .cell.on {
-  background: var(--ball);
-  border: 1.5px solid transparent;
-  color: var(--ball-ink);
+  background: var(--highlight);
+  border-color: var(--highlight);
+  box-shadow: none;
 }
 
 .cell:disabled {
@@ -699,17 +660,13 @@ button:focus-visible {
 }
 
 .attendance tfoot td {
-  background: var(--surface-2);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--muted);
+  border-top: 1px dashed var(--line);
   border-bottom: none;
 }
 
-.attendance tfoot .player-col {
-  background: var(--surface-2);
-}
-
-.player-name {
+.member-name {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -717,7 +674,7 @@ button:focus-visible {
   font-weight: 500;
 }
 
-.add-player {
+.add-member {
   display: flex;
   gap: 8px;
   padding: 14px 16px;
@@ -725,8 +682,8 @@ button:focus-visible {
   flex-wrap: wrap;
 }
 
-.add-player select,
-.add-player input {
+.add-member select,
+.add-member input {
   width: auto;
   flex: 1;
   min-width: 160px;
@@ -758,6 +715,12 @@ button:focus-visible {
   background: var(--surface-2);
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell {
+    transition: none;
+  }
 }
 
 @media (max-width: 800px) {

@@ -2,9 +2,9 @@ import api from "./client";
 import type {
   LedgerEntry,
   Payment,
-  Player,
-  PlayerBill,
-  PlayerLedger,
+  Member,
+  MemberBill,
+  MemberLedger,
   Session,
   TimeSlot,
   User,
@@ -27,9 +27,9 @@ export async function register(name: string, email: string, password: string) {
 export interface NewSession {
   start_time: string;
   end_time: string;
-  court_price: number;
+  unit_rate: number;
   hourly_slots: boolean;
-  default_courts: number;
+  default_units: number;
 }
 
 export async function listSessions() {
@@ -49,62 +49,62 @@ export async function deleteSession(id: number) {
 }
 
 export async function getSessionBilling(id: number) {
-  return (await api.get<PlayerBill[]>(`/sessions/${id}/billing`)).data;
+  return (await api.get<MemberBill[]>(`/sessions/${id}/billing`)).data;
 }
 
 // Time slots
 
 export async function createTimeSlot(
   sessionId: number,
-  body: { start_time: string; end_time: string; courts_booked: number },
+  body: { start_time: string; end_time: string; units_booked: number },
 ) {
   return (await api.post<TimeSlot>(`/sessions/${sessionId}/timeslots`, body)).data;
 }
 
-export async function updateTimeSlotCourts(slotId: number, courts: number) {
-  return (await api.put<TimeSlot>(`/timeslots/${slotId}`, { courts_booked: courts })).data;
+export async function updateTimeSlotUnits(slotId: number, units: number) {
+  return (await api.put<TimeSlot>(`/timeslots/${slotId}`, { units_booked: units })).data;
 }
 
 export async function deleteTimeSlot(slotId: number) {
   await api.delete(`/timeslots/${slotId}`);
 }
 
-export async function assignPlayer(slotId: number, playerId: number) {
-  await api.post(`/timeslots/${slotId}/players`, { player_id: playerId });
+export async function assignMember(slotId: number, memberId: number) {
+  await api.post(`/timeslots/${slotId}/members`, { member_id: memberId });
 }
 
-export async function removePlayer(slotId: number, playerId: number) {
-  await api.delete(`/timeslots/${slotId}/players/${playerId}`);
+export async function removeMember(slotId: number, memberId: number) {
+  await api.delete(`/timeslots/${slotId}/members/${memberId}`);
 }
 
-// Players and ledger
+// Members and ledger
 
-export async function listPlayers() {
-  return (await api.get<Player[]>("/players")).data;
+export async function listMembers() {
+  return (await api.get<Member[]>("/members")).data;
 }
 
-export async function createPlayer(name: string, phone: string) {
-  return (await api.post<Player>("/players", { name, phone })).data;
+export async function createMember(name: string, phone: string) {
+  return (await api.post<Member>("/members", { name, phone })).data;
 }
 
 export async function getLedger() {
   return (await api.get<LedgerEntry[]>("/ledger")).data;
 }
 
-export async function getPlayerLedger(id: number) {
-  return (await api.get<PlayerLedger>(`/players/${id}/ledger`)).data;
+export async function getMemberLedger(id: number) {
+  return (await api.get<MemberLedger>(`/members/${id}/ledger`)).data;
 }
 
 // Payments
 
-export async function listPayments(filter: { player_id?: number; session_id?: number } = {}) {
+export async function listPayments(filter: { member_id?: number; session_id?: number } = {}) {
   return (await api.get<Payment[]>("/payments", { params: filter })).data;
 }
 
-export async function createPayment(playerId: number, sessionId: number, amount: number) {
+export async function createPayment(memberId: number, sessionId: number, amount: number) {
   return (
     await api.post<Payment>("/payments", {
-      player_id: playerId,
+      member_id: memberId,
       session_id: sessionId,
       amount,
     })

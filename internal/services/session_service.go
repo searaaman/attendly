@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/searaaman/playledger/internal/domain"
+	"github.com/searaaman/attendly/internal/domain"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +16,7 @@ var (
 
 // BuildHourlySlots cuts [start, end) into one-hour slots. If the range is not a
 // whole number of hours, the last slot is shorter.
-func BuildHourlySlots(start, end time.Time, courts int) []domain.TimeSlot {
+func BuildHourlySlots(start, end time.Time, units int) []domain.TimeSlot {
 	var slots []domain.TimeSlot
 	for slotStart := start; slotStart.Before(end); slotStart = slotStart.Add(time.Hour) {
 		slotEnd := slotStart.Add(time.Hour)
@@ -24,10 +24,10 @@ func BuildHourlySlots(start, end time.Time, courts int) []domain.TimeSlot {
 			slotEnd = end
 		}
 		slots = append(slots, domain.TimeSlot{
-			StartTime:    slotStart,
-			EndTime:      slotEnd,
-			CourtsBooked: courts,
-			Players:      []domain.Player{},
+			StartTime:   slotStart,
+			EndTime:     slotEnd,
+			UnitsBooked: units,
+			Members:     []domain.Member{},
 		})
 	}
 	return slots
@@ -38,12 +38,12 @@ func NewSession(request domain.CreateSessionRequest) (domain.Session, error) {
 		return domain.Session{}, ErrInvalidTimeRange
 	}
 	session := domain.Session{
-		StartTime:  request.StartTime,
-		EndTime:    request.EndTime,
-		CourtPrice: request.CourtPrice,
+		StartTime: request.StartTime,
+		EndTime:   request.EndTime,
+		UnitRate:  request.UnitRate,
 	}
 	if request.HourlySlots {
-		session.TimeSlots = BuildHourlySlots(request.StartTime, request.EndTime, request.DefaultCourts)
+		session.TimeSlots = BuildHourlySlots(request.StartTime, request.EndTime, request.DefaultUnits)
 	}
 	return session, nil
 }
@@ -79,7 +79,7 @@ func DeleteSession(db *gorm.DB, sessionID uint) error {
 			return err
 		}
 		if len(slotIDs) > 0 {
-			if err := tx.Exec("DELETE FROM player_time_slots WHERE time_slot_id IN ?", slotIDs).Error; err != nil {
+			if err := tx.Exec("DELETE FROM member_time_slots WHERE time_slot_id IN ?", slotIDs).Error; err != nil {
 				return err
 			}
 			if err := tx.Where("id IN ?", slotIDs).Delete(&domain.TimeSlot{}).Error; err != nil {
@@ -93,7 +93,7 @@ func DeleteSession(db *gorm.DB, sessionID uint) error {
 // DeleteTimeSlot removes a slot and its attendance records.
 func DeleteTimeSlot(db *gorm.DB, slotID uint) error {
 	return db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Exec("DELETE FROM player_time_slots WHERE time_slot_id = ?", slotID).Error; err != nil {
+		if err := tx.Exec("DELETE FROM member_time_slots WHERE time_slot_id = ?", slotID).Error; err != nil {
 			return err
 		}
 		return tx.Delete(&domain.TimeSlot{}, slotID).Error

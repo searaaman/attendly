@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { errorMessage } from "../api/client";
-import { deletePayment, getPlayerLedger } from "../api/endpoints";
+import { deletePayment, getMemberLedger } from "../api/endpoints";
 import Balance from "../components/Balance";
 import { ErrorBox, Loading } from "../components/Status";
 import { date, dateTime, isZero, money, shortDate, timeRange } from "../lib/format";
@@ -15,11 +15,11 @@ function whatsappLink(phone: string, message: string): string | null {
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
-function PlayerDetail() {
+function MemberDetail() {
   const { id } = useParams();
-  const playerId = Number(id);
+  const memberId = Number(id);
   const navigate = useNavigate();
-  const { data: ledger, error: loadError, reload } = useLoad(() => getPlayerLedger(playerId), playerId);
+  const { data: ledger, error: loadError, reload } = useLoad(() => getMemberLedger(memberId), memberId);
   const [error, setError] = useState<string | null>(null);
 
   if (loadError) return <ErrorBox message={loadError} />;
@@ -28,7 +28,7 @@ function PlayerDetail() {
   const owes = ledger.balance < 0 && !isZero(ledger.balance);
   const reminder = whatsappLink(
     ledger.phone,
-    `Hi ${ledger.name}, your pickleball balance is ${money(-ledger.balance)}. Thanks!`,
+    `Hi ${ledger.name}, your outstanding balance is ${money(-ledger.balance)}. Thanks!`,
   );
 
   const handleDelete = async (paymentId: number, amount: number) => {
@@ -46,7 +46,7 @@ function PlayerDetail() {
       <div className="page-head">
         <div>
           <p className="small">
-            <Link to="/players">← Players</Link>
+            <Link to="/members">← Members</Link>
           </p>
           <h1>{ledger.name}</h1>
           {ledger.phone && <p className="muted">{ledger.phone}</p>}
@@ -87,7 +87,7 @@ function PlayerDetail() {
             <h2>Sessions</h2>
           </div>
           {ledger.sessions.length === 0 ? (
-            <p className="empty">Hasn't played yet.</p>
+            <p className="empty">No attendance yet.</p>
           ) : (
             <div className="table-wrap" style={{ marginTop: 12 }}>
               <table>
@@ -167,4 +167,4 @@ function PlayerDetail() {
   );
 }
 
-export default PlayerDetail;
+export default MemberDetail;

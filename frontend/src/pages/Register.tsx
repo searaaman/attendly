@@ -30,10 +30,10 @@ function Register() {
 
   return (
     <div className="auth">
-      <div className="card auth-card">
+      <div className="auth-card">
         <div className="brand">
-          <span className="brand-ball" aria-hidden="true" />
-          PlayLedger
+          <span className="brand-mark" aria-hidden="true" />
+          Attendly
         </div>
         <ErrorBox message={error} />
         <form onSubmit={handleSubmit}>

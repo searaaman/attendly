@@ -1,31 +1,31 @@
 package services
 
 import (
-	"github.com/searaaman/playledger/internal/domain"
+	"github.com/searaaman/attendly/internal/domain"
 	"testing"
 )
 
-func TestCalculateSessionBillsTwoPlayers(t *testing.T) {
-	rahul := domain.Player{
+func TestCalculateSessionBillsTwoMembers(t *testing.T) {
+	rahul := domain.Member{
 		ID:   1,
 		Name: "Rahul",
 	}
 
-	anand := domain.Player{
+	anand := domain.Member{
 		ID:   2,
 		Name: "Anand",
 	}
 
 	slot := domain.TimeSlot{
-		CourtsBooked: 1,
-		Players: []domain.Player{
+		UnitsBooked: 1,
+		Members: []domain.Member{
 			rahul,
 			anand,
 		},
 	}
 
 	session := domain.Session{
-		CourtPrice: 300,
+		UnitRate: 300,
 		TimeSlots: []domain.TimeSlot{
 			slot,
 		},
@@ -40,7 +40,7 @@ func TestCalculateSessionBillsTwoPlayers(t *testing.T) {
 	billMap := make(map[uint]float64)
 
 	for _, bill := range bills {
-		billMap[bill.PlayerID] = bill.Amount
+		billMap[bill.MemberID] = bill.Amount
 	}
 
 	if billMap[rahul.ID] != 150 {
@@ -53,33 +53,33 @@ func TestCalculateSessionBillsTwoPlayers(t *testing.T) {
 }
 
 func TestCalculateSessionBillsMultipleTimeSlots(t *testing.T) {
-	rahul := domain.Player{
+	rahul := domain.Member{
 		ID:   1,
 		Name: "Rahul",
 	}
 
-	anand := domain.Player{
+	anand := domain.Member{
 		ID:   2,
 		Name: "Anand",
 	}
 
 	slot1 := domain.TimeSlot{
-		CourtsBooked: 1,
-		Players: []domain.Player{
+		UnitsBooked: 1,
+		Members: []domain.Member{
 			rahul,
 			anand,
 		},
 	}
 
 	slot2 := domain.TimeSlot{
-		CourtsBooked: 1,
-		Players: []domain.Player{
+		UnitsBooked: 1,
+		Members: []domain.Member{
 			rahul,
 		},
 	}
 
 	session := domain.Session{
-		CourtPrice: 300,
+		UnitRate: 300,
 		TimeSlots: []domain.TimeSlot{
 			slot1,
 			slot2,
@@ -95,7 +95,7 @@ func TestCalculateSessionBillsMultipleTimeSlots(t *testing.T) {
 	billMap := make(map[uint]float64)
 
 	for _, bill := range bills {
-		billMap[bill.PlayerID] = bill.Amount
+		billMap[bill.MemberID] = bill.Amount
 	}
 
 	if billMap[rahul.ID] != 450 {
@@ -107,28 +107,28 @@ func TestCalculateSessionBillsMultipleTimeSlots(t *testing.T) {
 	}
 }
 
-func TestCalculateSessionBillsMultipleCourts(t *testing.T) {
+func TestCalculateSessionBillsMultipleUnits(t *testing.T) {
 
-	rahul := domain.Player{
+	rahul := domain.Member{
 		ID:   1,
 		Name: "Rahul",
 	}
 
-	anand := domain.Player{
+	anand := domain.Member{
 		ID:   2,
 		Name: "Anand",
 	}
 
 	slot := domain.TimeSlot{
-		CourtsBooked: 2,
-		Players: []domain.Player{
+		UnitsBooked: 2,
+		Members: []domain.Member{
 			rahul,
 			anand,
 		},
 	}
 
 	session := domain.Session{
-		CourtPrice: 300,
+		UnitRate: 300,
 		TimeSlots: []domain.TimeSlot{
 			slot,
 		},
@@ -143,7 +143,7 @@ func TestCalculateSessionBillsMultipleCourts(t *testing.T) {
 	billMap := make(map[uint]float64)
 
 	for _, bill := range bills {
-		billMap[bill.PlayerID] = bill.Amount
+		billMap[bill.MemberID] = bill.Amount
 	}
 
 	if billMap[rahul.ID] != 300 {
@@ -158,12 +158,12 @@ func TestCalculateSessionBillsMultipleCourts(t *testing.T) {
 func TestCalculateSessionBillsEmptyTimeSlot(t *testing.T) {
 
 	slot := domain.TimeSlot{
-		CourtsBooked: 1,
-		Players:      []domain.Player{},
+		UnitsBooked: 1,
+		Members:     []domain.Member{},
 	}
 
 	session := domain.Session{
-		CourtPrice: 300,
+		UnitRate: 300,
 		TimeSlots: []domain.TimeSlot{
 			slot,
 		},
@@ -179,8 +179,8 @@ func TestCalculateSessionBillsEmptyTimeSlot(t *testing.T) {
 func TestCalculateSessionBillsEmptySession(t *testing.T) {
 
 	session := domain.Session{
-		CourtPrice: 300,
-		TimeSlots:  []domain.TimeSlot{},
+		UnitRate:  300,
+		TimeSlots: []domain.TimeSlot{},
 	}
 
 	bills := CalculateSessionBills(session)
@@ -192,24 +192,24 @@ func TestCalculateSessionBillsEmptySession(t *testing.T) {
 
 // The session we verified by hand through the API.
 func TestCalculateSessionBillsRealSession(t *testing.T) {
-	rahul := domain.Player{ID: 1, Name: "Rahul"}
-	akhil := domain.Player{ID: 2, Name: "Akhil"}
-	anand := domain.Player{ID: 3, Name: "Anand"}
+	rahul := domain.Member{ID: 1, Name: "Rahul"}
+	akhil := domain.Member{ID: 2, Name: "Akhil"}
+	anand := domain.Member{ID: 3, Name: "Anand"}
 
 	session := domain.Session{
-		CourtPrice: 300,
+		UnitRate: 300,
 		TimeSlots: []domain.TimeSlot{
-			{CourtsBooked: 2, Players: []domain.Player{rahul, akhil, anand}},
-			{CourtsBooked: 1, Players: []domain.Player{rahul, anand}},
+			{UnitsBooked: 2, Members: []domain.Member{rahul, akhil, anand}},
+			{UnitsBooked: 1, Members: []domain.Member{rahul, anand}},
 		},
 	}
 
 	bills := CalculateSessionBills(session)
 
-	expected := []domain.PlayerBill{
-		{PlayerID: 2, Name: "Akhil", Amount: 200},
-		{PlayerID: 3, Name: "Anand", Amount: 350},
-		{PlayerID: 1, Name: "Rahul", Amount: 350},
+	expected := []domain.MemberBill{
+		{MemberID: 2, Name: "Akhil", Amount: 200},
+		{MemberID: 3, Name: "Anand", Amount: 350},
+		{MemberID: 1, Name: "Rahul", Amount: 350},
 	}
 	if len(bills) != len(expected) {
 		t.Fatalf("expected %d bills, got %d", len(expected), len(bills))

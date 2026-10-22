@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const TOKEN_KEY = "playledger_token";
-const USER_KEY = "playledger_user";
+const TOKEN_KEY = "attendly_token";
+const USER_KEY = "attendly_user";
 
 // In dev, Vite proxies /api to the Go server; in Docker, nginx does the same.
 const api = axios.create({

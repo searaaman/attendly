@@ -5,10 +5,10 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/searaaman/playledger/internal/config"
-	"github.com/searaaman/playledger/internal/docs"
-	"github.com/searaaman/playledger/internal/handlers"
-	"github.com/searaaman/playledger/internal/middleware"
+	"github.com/searaaman/attendly/internal/config"
+	"github.com/searaaman/attendly/internal/docs"
+	"github.com/searaaman/attendly/internal/handlers"
+	"github.com/searaaman/attendly/internal/middleware"
 )
 
 func main() {
@@ -43,12 +43,12 @@ func main() {
 
 	auth.PUT("/timeslots/:id", handlers.UpdateTimeSlot)
 	auth.DELETE("/timeslots/:id", handlers.DeleteTimeSlot)
-	auth.POST("/timeslots/:id/players", handlers.AssignPlayerToTimeSlot)
-	auth.DELETE("/timeslots/:id/players/:playerId", handlers.RemovePlayerFromTimeSlot)
+	auth.POST("/timeslots/:id/members", handlers.AssignMemberToTimeSlot)
+	auth.DELETE("/timeslots/:id/members/:memberId", handlers.RemoveMemberFromTimeSlot)
 
-	auth.GET("/players", handlers.GetPlayers)
-	auth.POST("/players", handlers.CreatePlayer)
-	auth.GET("/players/:id/ledger", handlers.GetPlayerLedger)
+	auth.GET("/members", handlers.GetMembers)
+	auth.POST("/members", handlers.CreateMember)
+	auth.GET("/members/:id/ledger", handlers.GetMemberLedger)
 	auth.GET("/ledger", handlers.GetLedger)
 
 	auth.GET("/payments", handlers.ListPayments)
