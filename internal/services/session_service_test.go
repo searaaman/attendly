@@ -86,3 +86,13 @@ func TestValidateTimeSlot(t *testing.T) {
 		}
 	}
 }
+
+func TestNewSessionRejectsOverlongSession(t *testing.T) {
+	start := time.Date(2026, 9, 1, 18, 0, 0, 0, time.UTC)
+
+	_, err := NewSession(domain.CreateSessionRequest{StartTime: start, EndTime: start.Add(25 * time.Hour)})
+
+	if err != ErrSessionTooLong {
+		t.Errorf("expected ErrSessionTooLong, got %v", err)
+	}
+}
