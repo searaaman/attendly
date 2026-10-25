@@ -10,6 +10,7 @@ import (
 
 var (
 	ErrInvalidTimeRange   = errors.New("end time must be after start time")
+	ErrSessionTooLong     = errors.New("session cannot be longer than 24 hours")
 	ErrSlotOutsideSession = errors.New("time slot must fall within the session")
 	ErrSessionHasPayments = errors.New("session has payments recorded; delete those first")
 )
@@ -36,6 +37,10 @@ func BuildHourlySlots(start, end time.Time, units int) []domain.TimeSlot {
 func NewSession(request domain.CreateSessionRequest) (domain.Session, error) {
 	if !request.EndTime.After(request.StartTime) {
 		return domain.Session{}, ErrInvalidTimeRange
+	}
+	// A mistyped end date would otherwise create thousands of hourly slots.
+	if request.EndTime.Sub(request.StartTime) > 24*time.Hour {
+		return domain.Session{}, ErrSessionTooLong
 	}
 	session := domain.Session{
 		StartTime: request.StartTime,
